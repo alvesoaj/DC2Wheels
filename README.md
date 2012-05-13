@@ -2,6 +2,8 @@
 
 DC2Wheels is an Arduino's library to control the movements of robots guided by two wheels connected to `DC motors`
 
+for robots with Servo Motors go to [DC2Wheels](http://github.com/zerokol/Continuous2Wheels)
+
 ### Instalation
 
 Clone or [download](https://github.com/zerokol/DC2Wheels/downloads) this project to arduino's libraries folder:

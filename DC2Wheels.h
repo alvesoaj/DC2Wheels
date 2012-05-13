@@ -19,6 +19,7 @@
 #include <inttypes.h>
 //Arduino headers
 #include <WProgram.h> //Header to work with native proprietes from Arduino plataform "http://www.arduino.cc"
+#include <Servo.h> //Header do work with Servo Engines "http://www.arduino.cc/en/Reference/Servo"
 /********************************************************************
  * CONSTANTS
  ********************************************************************/
