@@ -19,7 +19,6 @@
 #include <inttypes.h>
 //Arduino headers
 #include <WProgram.h> //Header to work with native proprietes from Arduino plataform "http://www.arduino.cc"
-#include <Servo.h> //Header do work with Servo Engines "http://www.arduino.cc/en/Reference/Servo"
 /********************************************************************
  * CONSTANTS
  ********************************************************************/
@@ -37,8 +36,8 @@
 #define BACKWARD 2 //It sights machine is moving to backward
 #define RESISTENCE_DEFAULT 0 //Perfect world resistance
 #define BEND_SMOOTH_DEFAULT 0.0 //Bend smooth value default does't attenuate nothing
-#define MAXIMUM_SPEED 90 //Maximum speed who a Servo reaches
-#define MINIMUM_SPEED 0 //Minimum value who a Servo sets *STOPED
+#define MAXIMUM_SPEED 255 // Max duty cycle for PWM
+#define MINIMUM_SPEED 0 //Minimum duty cycle for PWM value of *STOPED
 /********************************************************************
  * DECLARATIONS
  ********************************************************************/
@@ -55,15 +54,18 @@ public:
 	 The Radius of machine's wheels,
 	 The Bend Radius, Bend radius is the length value from one wheel to another, the machine shaft length
 
-	 The first constructor to work in a ideal scenery, without resistance, the second needs to set a resistance value
+	 The first constructor to work in a ideal scenery, without resistance, the second needs to set a resistance value,
+	 and the last sets bend smooth too
 	 */
-	DC2Wheels(Servo* rightWhreel, Servo* leftWhreel, double wheellRadius,
+	DC2Wheels(int rightWhreelPins[], int leftWhreelPins[], double wheellRadius,
 			double bendRadius);
-	DC2Wheels(Servo* rightWhreel, Servo* leftWhreel, double wheellRadius,
+	DC2Wheels(int rightWhreelPins[], int leftWhreelPins[], double wheellRadius,
 			double bendRadius, double resistence);
+	DC2Wheels(int rightWhreelPins[], int leftWhreelPins[], double wheellRadius,
+			double bendRadius, double resistence, float bendSmooth);
 
 	/*
-	 speed* must be higher or equal to 0 and lower or equal to 90
+	 speed* must be higher or equal to 0 and lower or equal to 100, is a percent
 	 distance** is a value in centimeter
 	 degree*** is a value positive or negative different of 0, the sigh determines the direction
 	 degree**** is a value higher then 0
@@ -92,8 +94,8 @@ public:
 	void setSerialPortBaud(long baud); //Method to set the baud value of serial port communication
 
 private:
-	Servo* _rightWheel; //Holds the Servo object which will work with the right wheel
-	Servo* _leftWheel; //Holds the Servo object which will work with the left wheel
+	int _rightWheelPins[2]; //Holds the pins which will work with the right wheel
+	int _leftWheelPins[2]; //Holds the pins object which will work with the left wheel
 	double _wheelRadius; //Holds the wheel radios value
 	double _bendRadius; //Holds the bend radius value
 
