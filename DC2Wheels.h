@@ -17,8 +17,8 @@
 #define DC2WHELLS_H
 //C headers
 #include <inttypes.h>
-//Arduino headers
-#include <WProgram.h> //Header to work with native proprietes from Arduino plataform "http://www.arduino.cc"
+#include <Arduino.h> // Header to work with native proprietes from Arduino plataform "http://www.arduino.cc" 1.0
+// #include <WProgram.h> // Header to work with native proprietes from Arduino plataform "http://www.arduino.cc" later
 /********************************************************************
  * CONSTANTS
  ********************************************************************/
@@ -38,6 +38,8 @@
 #define BEND_SMOOTH_DEFAULT 0.0 //Bend smooth value default does't attenuate nothing
 #define MAXIMUM_SPEED 255 // Max duty cycle for PWM
 #define MINIMUM_SPEED 0 //Minimum duty cycle for PWM value of *STOPED
+#define FRONT_POSITION 0 //Sight the array position to indicate front pin for well
+#define BACK_POSITION 1 //Sight the array position to indicate back pin for well
 /********************************************************************
  * DECLARATIONS
  ********************************************************************/
@@ -46,7 +48,6 @@ public:
 	int _speed; //Holds the actual machine' speed
 	int _direction; //Holds the actual motion direction of machine
 	double _resistence; //Holds the resistance from middle into the wheels, in a ideal scenery it is zero
-	long _serialPortBaud; //Holds the baud value for the serial port communication, by default 9600
 	float _bendSmooth; //Holds the smooth value to attenuate bends movies
 
 	/*Both constructors needs: the Arduino's pin in which the right Servo is plugged in,
@@ -57,11 +58,11 @@ public:
 	 The first constructor to work in a ideal scenery, without resistance, the second needs to set a resistance value,
 	 and the last sets bend smooth too
 	 */
-	DC2Wheels(int rightWhreelPins[], int leftWhreelPins[], double wheellRadius,
+	DC2Wheels(int *rightWhreelPins, int *leftWhreelPins, double wheellRadius,
 			double bendRadius);
-	DC2Wheels(int rightWhreelPins[], int leftWhreelPins[], double wheellRadius,
+	DC2Wheels(int *rightWhreelPins, int *leftWhreelPins, double wheellRadius,
 			double bendRadius, double resistence);
-	DC2Wheels(int rightWhreelPins[], int leftWhreelPins[], double wheellRadius,
+	DC2Wheels(int *rightWhreelPins, int *leftWhreelPins, double wheellRadius,
 			double bendRadius, double resistence, float bendSmooth);
 
 	/*
@@ -90,12 +91,10 @@ public:
 	int getDirection(); //Method to get direction value
 	float getBendSmooth(); //Method to get the bend smooth value
 	void setBendSmooth(float smooth); //Method to set the bend smooth***** value
-	long getSerialPortBaud(); //Method to get the baud value of serial port communication
-	void setSerialPortBaud(long baud); //Method to set the baud value of serial port communication
 
 private:
-	int _rightWheelPins[2]; //Holds the pins which will work with the right wheel
-	int _leftWheelPins[2]; //Holds the pins object which will work with the left wheel
+	int *_rightWheelPins; //Holds the pins which will work with the right wheel
+	int *_leftWheelPins; //Holds the pins object which will work with the left wheel
 	double _wheelRadius; //Holds the wheel radios value
 	double _bendRadius; //Holds the bend radius value
 

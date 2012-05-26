@@ -28,7 +28,7 @@
 /********************************************************************
  * IMPLEMENTATION OF PUBLIC METHODS
  ********************************************************************/
-DC2Wheels::DC2Wheels(int rightWhreelPins[], int leftWhreelPins[],
+DC2Wheels::DC2Wheels(int *rightWhreelPins, int *leftWhreelPins,
 		double wheellRadius, double bendRadius) {
 	//attaching referred pins to associative wheels
 	_rightWheelPins = rightWhreelPins;
@@ -43,7 +43,7 @@ DC2Wheels::DC2Wheels(int rightWhreelPins[], int leftWhreelPins[],
 	_bendSmooth = BEND_SMOOTH_DEFAULT;
 }
 
-DC2Wheels::DC2Wheels(int rightWhreelPins[], int leftWhreelPins[],
+DC2Wheels::DC2Wheels(int *rightWhreelPins, int *leftWhreelPins,
 		double wheellRadius, double bendRadius, double resistence) {
 	//attaching referred pins to associative wheels
 	_rightWheelPins = rightWhreelPins;
@@ -58,7 +58,7 @@ DC2Wheels::DC2Wheels(int rightWhreelPins[], int leftWhreelPins[],
 	_bendSmooth = BEND_SMOOTH_DEFAULT;
 }
 
-DC2Wheels::DC2Wheels(int rightWhreelPins[], int leftWhreelPins[],
+DC2Wheels::DC2Wheels(int *rightWhreelPins, int *leftWhreelPins,
 		double wheellRadius, double bendRadius, double resistence,
 		float bendSmooth) {
 	//attaching referred pins to associative wheels
@@ -88,8 +88,10 @@ void DC2Wheels::stop() {
 void DC2Wheels::forward(int speed) {
 	speed = speedFormater(speed);
 	_direction = FORWARD;
-	_rightWheelPins->write(STOPED + speed);
-	_leftWheelPins->write(STOPED - speed);
+	analogWrite(_rightWheelPins[BACK_POSITION], MINIMUM_SPEED);
+	analogWrite(_rightWheelPins[FRONT_POSITION], speed);
+	analogWrite(_leftWheelPins[BACK_POSITION], MINIMUM_SPEED);
+	analogWrite(_leftWheelPins[FRONT_POSITION], speed);
 	_speed = speed;
 }
 
@@ -101,8 +103,10 @@ void DC2Wheels::forward(int speed, double distance) {
 	//get the among of time to wait to reach the displacement
 	unsigned long waitValue = getWaitValue(displacement, speed);
 	//start the motion
-	_rightWheelPins->write(STOPED + speed);
-	_leftWheelPins->write(STOPED - speed);
+	analogWrite(_rightWheelPins[BACK_POSITION], MINIMUM_SPEED);
+	analogWrite(_rightWheelPins[FRONT_POSITION], speed);
+	analogWrite(_leftWheelPins[BACK_POSITION], MINIMUM_SPEED);
+	analogWrite(_leftWheelPins[FRONT_POSITION], speed);
 	//wait until to reach the target
 	delay(waitValue);
 	//stop the machine
@@ -113,8 +117,10 @@ void DC2Wheels::forward(int speed, double distance) {
 void DC2Wheels::backward(int speed) {
 	speed = speedFormater(speed);
 	_direction = BACKWARD;
-	_rightWheelPins->write(STOPED - speed);
-	_leftWheelPins->write(STOPED + speed);
+	analogWrite(_rightWheelPins[FRONT_POSITION], MINIMUM_SPEED);
+	analogWrite(_rightWheelPins[BACK_POSITION], speed);
+	analogWrite(_leftWheelPins[FRONT_POSITION], MINIMUM_SPEED);
+	analogWrite(_leftWheelPins[BACK_POSITION], speed);
 	_speed = speed;
 }
 
@@ -126,8 +132,10 @@ void DC2Wheels::backward(int speed, double distance) {
 	//get the among of time to wait to reach the displacement
 	unsigned long waitValue = getWaitValue(displacement, speed);
 	//start the motion
-	_rightWheelPins->write(STOPED - speed);
-	_leftWheelPins->write(STOPED + speed);
+	analogWrite(_rightWheelPins[FRONT_POSITION], MINIMUM_SPEED);
+	analogWrite(_rightWheelPins[BACK_POSITION], speed);
+	analogWrite(_leftWheelPins[FRONT_POSITION], MINIMUM_SPEED);
+	analogWrite(_leftWheelPins[BACK_POSITION], speed);
 	//wait until to reach the target
 	delay(waitValue);
 	//stop the machine
@@ -162,11 +170,11 @@ void DC2Wheels::rigthBend(int degree) {
 	//get the among of time to wait to reach the displacement
 	unsigned long waitValue = getWaitValue(displacement, _speed);
 	//adjust the right wheel for a bend
-	_rightWheelPins->write(STOPED + (_speed * _bendSmooth));
+	analogWrite(_rightWheelPins[0], _speed);
 	//wait until to reach the target
 	delay(waitValue);
 	//restart the motion
-	_rightWheelPins->write(getWheelSpeed(_speed, RIGHTWHEEL));
+	analogWrite(_leftWheelPins[0], _speed);
 }
 
 //Method to make a left bend with the passed degree**** value
@@ -183,12 +191,12 @@ void DC2Wheels::leftBend(int degree) {
 	double displacement = getCircleDisplacement(radiansVal, _bendRadius);
 	//get the among of time to wait to reach the displacement
 	unsigned long waitValue = getWaitValue(displacement, _speed);
-	//adjust the left wheel for a bend
-	_leftWheelPins->write(STOPED - (_speed * _bendSmooth));
+	//adjust the right wheel for a bend
+	analogWrite(_rightWheelPins[0], _speed);
 	//wait until to reach the target
 	delay(waitValue);
 	//restart the motion
-	_leftWheelPins->write(getWheelSpeed(_speed, LEFTWHEEL));
+	analogWrite(_leftWheelPins[0], _speed);
 }
 
 //Method to spin the machine in its own axis, the sign of param will determine the spin direction
@@ -203,12 +211,14 @@ void DC2Wheels::spin(int degree) {
 	unsigned long waitValue = getWaitValue(displacement, speed);
 	//from the sign of passed param choice the right direction
 	if (degree < 0) {
-		_rightWheelPins->write(speed);
-		_leftWheelPins->write(speed * -1);
+		analogWrite(_rightWheelPins[0], speed);
+		analogWrite(_leftWheelPins[0], speed * -1);
+
 	} else {
-		_rightWheelPins->write(speed * -1);
-		_leftWheelPins->write(speed);
+		analogWrite(_rightWheelPins[0], speed * -1);
+		analogWrite(_leftWheelPins[0], speed);
 	}
+
 	//wait until to reach the target
 	delay(waitValue);
 	//STOP THE MACHINE - FOR THE TIME BEING
@@ -218,24 +228,7 @@ void DC2Wheels::spin(int degree) {
 //Method to spin the machine in its own axis, the sign of param will determine the spin direction and in a certain speed*
 void DC2Wheels::spin(int degree, int speed) {
 	speed = speedFormater(speed);
-	//Get the raidians value from the degree
-	double radiansVal = degreeToRadian(degree);
-	//get the walk value of wheel displacement now using the bend radius, it will make the machine spin in itself
-	double displacement = getCircleDisplacement(radiansVal, (_bendRadius / 2));
-	//get the among of time to wait to reach the displacement
-	unsigned long waitValue = getWaitValue(displacement, speed);
-	//from the sign of passed param choice the right direction
-	if (degree < 0) {
-		_rightWheelPins->write(speed);
-		_leftWheelPins->write(speed * -1);
-	} else {
-		_rightWheelPins->write(speed * -1);
-		_leftWheelPins->write(speed);
-	}
-	//wait until to reach the target
-	delay(waitValue);
-	//STOP THE MACHINE - FOR THE TIME BEING
-	stop();
+	spin(degree);
 }
 
 //Method to get the speed value
@@ -261,18 +254,6 @@ void DC2Wheels::setBendSmooth(float smooth) {
 		smooth = 1.0;
 	}
 	_bendSmooth = smooth;
-}
-
-//Method to get the baud value of serial port communication
-long DC2Wheels::getSerialPortBaud() {
-	return _serialPortBaud;
-}
-
-//Method to set the baud value of serial port communication
-void DC2Wheels::setSerialPortBaud(long baud) {
-	_serialPortBaud = baud;
-	Serial.end();
-	Serial.begin(_serialPortBaud);
 }
 
 /********************************************************************
@@ -333,8 +314,8 @@ unsigned long DC2Wheels::getWaitValue(double displacement, int speed) {
 int DC2Wheels::speedFormater(int speed) {
 	if (speed < 0) {
 		speed = 0;
-	} else if (speed > 90) {
-		speed = 90;
+	} else if (speed > 100) {
+		speed = 100;
 	}
-	return speed;
+	return (speed * MAXIMUM_SPEED) / 100;
 }
